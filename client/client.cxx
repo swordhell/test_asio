@@ -28,6 +28,11 @@ public:
 	{
 	}
 
+	virtual ~session()
+	{
+		delete socket_;
+	}
+
 	void start()
 	{
 		socket_ = new tcp::socket(io_context_);
@@ -79,7 +84,7 @@ private:
 			});
 	}
 	boost::asio::io_context& io_context_;
-	tcp::socket* socket_;
+	tcp::socket* socket_ = {nullptr};
 	boost::asio::ip::tcp::endpoint endpoints_;
 	enum { max_length = 1024 };
 	char data_[max_length] = {0};
