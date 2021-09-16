@@ -57,7 +57,7 @@ private:
 			{
 				if (ec)
 				{
-					spdlog::warn("{} error: {}", __FUNCTION__, error.message().c_str());
+					spdlog::warn("{} error: {}", __FUNCTION__, ec.message().c_str());
 					return;
 				}
 				self->do_read();
@@ -72,7 +72,7 @@ private:
 			{
 				if (ec)
 				{
-					spdlog::warn("{} error: {}", __FUNCTION__, error.message().c_str());
+					spdlog::warn("{} error: {}", __FUNCTION__, ec.message().c_str());
 					return;
 				}
 				do_read();

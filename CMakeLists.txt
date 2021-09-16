@@ -2,11 +2,10 @@ cmake_minimum_required (VERSION 3.16)
 
 project(test_asio)
 
-add_definitions(-DBOOST_ASIO_HAS_CO_AWAIT)
+    include_directories( $ENV{SPDLOG_PATH} $ENV{BOOST_PATH})
 
 IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
-    include_directories( $ENV{SPDLOG_PATH} $ENV{BOOST_PATH})
     LINK_DIRECTORIES( $ENV{BOOST_PATH}/lib64-msvc-14.2/ )
 
     add_compile_options("/std:c++17")
@@ -25,9 +24,9 @@ IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
 ELSE ()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fdiagnostics-color=auto")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-limit-debug-info")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-limit-debug-info -std=c++14")
     add_compile_options(-g)
-    add_compile_options(-std=c++17)
+    #add_compile_options(-std=c++17)
     add_compile_options(-ggdb)
     add_compile_options(-Wall)
     link_libraries(stdc++fs)
