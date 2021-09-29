@@ -36,7 +36,6 @@ public:
 	void start()
 	{
 		socket_ = new tcp::socket(io_context_);
-		socket_->set_option(boost::asio::ip::tcp::no_delay(true));
 		socket_->async_connect(endpoints_,
 			boost::bind(&session::do_connect, shared_from_this(), boost::asio::placeholders::error));
 	}
@@ -46,23 +45,23 @@ private:
 	{
 		if (error)
 		{
-			spdlog::warn("{} error: {}", __FUNCTION__, error.message().c_str());
+			spdlog::warn("{} error num {} {}", __FUNCTION__, error.value(), error.message().c_str());
 			return;
 		}
-		memset(data_, 0, 6);;
-		memcpy(data_, "12345", 6);
-		do_write(5);
+		memset(data_, 0, 6);
+		memcpy(data_, "12345", 5);
+		do_write(6);
 	}
 
 	void do_read()
 	{
 		auto self(shared_from_this());
-		socket_->async_read_some(boost::asio::buffer(data_, max_length),
-			[this, self](boost::system::error_code ec, std::size_t length)
+		boost::asio::async_read(*socket_, boost::asio::buffer(data_, max_length), 
+			[self](boost::system::error_code ec, std::size_t length)
 			{
 				if (ec)
 				{
-					spdlog::warn("{} error: {}", __FUNCTION__, ec.message().c_str());
+					spdlog::warn("{} error num {} {}", __FUNCTION__, ec.value(), ec.message().c_str());
 					return;
 				}
 				self->do_read();
@@ -73,14 +72,13 @@ private:
 	{
 		auto self(shared_from_this());
 		boost::asio::async_write(*socket_, boost::asio::buffer(data_, length),
-			[this, self](boost::system::error_code ec, std::size_t /*length*/)
+			[self](boost::system::error_code ec, std::size_t /*length*/)
 			{
 				if (ec)
 				{
 					spdlog::warn("{} error: {}", __FUNCTION__, ec.message().c_str());
 					return;
 				}
-				do_read();
 			});
 	}
 	boost::asio::io_context& io_context_;
@@ -101,12 +99,18 @@ public:
 		do_connect();
 	}
 
+	~manager()
+	{
+	}
+
 private:
 	void do_connect()
 	{
+		std::shared_ptr<session> cliRef;
 		for (auto i = 0; i < count_; i++)
 		{
-			std::make_shared<session>(io_context_,std::move(endpoints_))->start();
+			auto cli = std::make_shared<session>(io_context_, std::move(endpoints_));
+			cli->start();
 		}
 	}
 
